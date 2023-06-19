@@ -17,9 +17,15 @@ public class ContaController {
     @Autowired
     private ContaRepository contaRepository;
 
+    @GetMapping("/{id}")
+    public ResponseEntity detalhar(@PathVariable Long id) {
+        var conta = contaRepository.getReferenceById(id);
+        return ResponseEntity.ok(new ContaDTO(conta));
+    }
+
     @GetMapping
     public ResponseEntity<Stream<ContaDTO>> listar(){
-        var contas = contaRepository.findAll().stream().map(ContaDTO::new);
+        var contas = contaRepository.findAllByAtivaTrue().stream().map(ContaDTO::new);
         return ResponseEntity.ok(contas);
     }
 
@@ -29,5 +35,13 @@ public class ContaController {
         var conta = new Conta(dados);
         contaRepository.save(conta);
         return ResponseEntity.ok(conta);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity inativar(@PathVariable Long id){
+        var conta = contaRepository.getReferenceById(id);
+        conta.excluir();
+        return ResponseEntity.noContent().build();
     }
 }
